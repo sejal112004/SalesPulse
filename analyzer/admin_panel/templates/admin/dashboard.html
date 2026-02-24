@@ -1,0 +1,154 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Admin Dashboard - SalesPulse{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-card stat-primary">
+            <div class="stat-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ total_users|intcomma }}</h3>
+                <p>Total Users</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card stat-success">
+            <div class="stat-icon">
+                <i class="bi bi-person-check"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ active_users|intcomma }}</h3>
+                <p>Active Users</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card stat-info">
+            <div class="stat-icon">
+                <i class="bi bi-database"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ total_datasets|intcomma }}</h3>
+                <p>Total Datasets</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card stat-warning">
+            <div class="stat-icon">
+                <i class="bi bi-calendar-week"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ recent_users|intcomma }}</h3>
+                <p>New Users (7 days)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="admin-card">
+            <h5 class="card-title">
+                <i class="bi bi-star"></i> Top Users by Datasets
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Datasets</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in top_users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email|default:"N/A" }}</td>
+                            <td><span class="badge bg-primary">{{ user.dataset_count }}</span></td>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No users found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="admin-card">
+            <h5 class="card-title">
+                <i class="bi bi-graph-up"></i> Quick Stats
+            </h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Users This Month</span>
+                    <strong>{{ users_this_month|intcomma }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Recent Datasets (7 days)</span>
+                    <strong>{{ recent_datasets|intcomma }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Active Users</span>
+                    <strong>{{ active_users|intcomma }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Total Datasets</span>
+                    <strong>{{ total_datasets|intcomma }}</strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="admin-card">
+            <h5 class="card-title">
+                <i class="bi bi-lightning"></i> Quick Actions
+            </h5>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'admin_panel:manage_users' %}" class="btn btn-primary">
+                    <i class="bi bi-people"></i> Manage Users
+                </a>
+                <a href="{% url 'admin_panel:manage_datasets' %}" class="btn btn-info">
+                    <i class="bi bi-database"></i> Manage Datasets
+                </a>
+                <a href="{% url 'admin_panel:system_settings' %}" class="btn btn-secondary">
+                    <i class="bi bi-gear"></i> System Settings
+                </a>
+                <a href="{% url 'admin:index' %}" class="btn btn-outline-dark" target="_blank">
+                    <i class="bi bi-box-arrow-up-right"></i> Django Admin
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

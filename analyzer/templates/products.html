@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Products - SalesPulse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/products.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="products-container">
+    <!-- Page Header -->
+    <div class="page-header mb-5">
+        <h1 class="page-title">Products Insights</h1>
+        <p class="text-muted fs-5">
+            {% if filename %}Analyzing performance from <strong>{{ filename }}</strong>{% else %}No dataset selected{% endif %}
+        </p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value">{{ total_products|default:0 }}</h3>
+                <p class="summary-label">Total Unique Products</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value">{{ low_stock_count|default:0 }}</h3>
+                <p class="summary-label">Low Stock Items{% if low_stock_count %} (≤ 10 units){% endif %}</p>
+                {% if low_stock_count and low_stock_count > 0 %}
+                <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle"></i> Requires Attention</span>
+                {% else %}
+                <small class="text-muted">Stock column not found or all healthy</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value">
+                    {% if avg_margin is not None %}
+                        {{ avg_margin|floatformat:1 }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </h3>
+                <p class="summary-label">Average Profit Margin</p>
+                <small class="text-muted">{% if has_profit_data %}Across all products{% else %}Profit/Cost data not found{% endif %}</small>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value text-truncate">{{ top_product }}</h3>
+                <p class="summary-label">Top Performing Product</p>
+                <small class="text-success">By revenue</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="chart-card" style="overflow: hidden;">
+                <h4 class="card-title">Revenue by Category</h4>
+                <div style="position: relative; height: 400px; max-height: 400px; overflow: hidden;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <p id="categoryChartFallback" class="text-muted text-center py-4 d-none">
+                    Category column not found in dataset.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="chart-card" style="overflow: hidden;">
+                <h4 class="card-title">Top 10 Products by Profit Margin</h4>
+                <div style="position: relative; height: 400px; max-height: 400px; overflow: hidden;">
+                    <canvas id="marginChart"></canvas>
+                </div>
+                <p id="marginChartFallback" class="text-muted text-center py-4 d-none">
+                    Profit or cost data not available to compute margins.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products Table -->
+    <div class="table-card">
+        <h4 class="card-title mb-4">Top 10 Products by Revenue</h4>
+        {% if top_products %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Rank</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Units Sold</th>
+                        <th>Revenue</th>
+                        <th>Profit</th>
+                        <th>Current Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in top_products %}
+                    <tr>
+                        <td>{{ p.rank }}</td>
+                        <td><strong>{{ p.product_name }}</strong></td>
+                        <td>{{ p.category|default:"N/A" }}</td>
+                        <td>{{ p.units_sold|floatformat:0|intcomma }}</td>
+                        <td>₹{{ p.revenue|floatformat:0|intcomma }}</td>
+                        <td>
+                            {% if p.profit is not None %}
+                                ₹{{ p.profit|floatformat:0|intcomma }} ({{ p.margin_pct|floatformat:1 }}%)
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.stock is not None %}
+                                <span class="{% if p.stock <= 10 %}text-danger fw-bold{% endif %}">{{ p.stock }}</span>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-4">
+            {% if filename %}
+                No product metrics could be computed. Check that your file has Product, Quantity, and Price columns.
+            {% else %}
+                Upload a dataset to see product performance.
+            {% endif %}
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js Data Labels Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+// Register the plugin globally
+if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+    Chart.register(ChartDataLabels);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Revenue by Category
+    const categoryData = {{ category_data|safe }};
+    (function () {
+        const categoryCanvas = document.getElementById('categoryChart');
+        const fallback = document.getElementById('categoryChartFallback');
+        if (!categoryCanvas) return;
+
+        if (categoryData.labels && categoryData.labels.length) {
+            const categoryCtx = categoryCanvas.getContext('2d');
+            new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: categoryData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        } else if (fallback) {
+            categoryCanvas.classList.add('d-none');
+            fallback.classList.remove('d-none');
+        }
+    })();
+
+    // Profit margin chart with data labels
+    const marginChartData = {{ margin_data|safe }};
+    (function () {
+        const marginCanvas = document.getElementById('marginChart');
+        const fallback = document.getElementById('marginChartFallback');
+        if (!marginCanvas) return;
+
+        if (marginChartData.labels && marginChartData.labels.length) {
+            const marginCtx = marginCanvas.getContext('2d');
+            
+            const chartConfig = {
+                type: 'bar',
+                data: marginChartData,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            right: 30
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Profit Margin: ' + context.parsed.x.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { 
+                                display: true, 
+                                text: 'Profit Margin (%)',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                maxRotation: 0,
+                                autoSkip: false
+                            }
+                        }
+                    }
+                }
+            };
+            
+            // Add data labels plugin if available
+            if (typeof ChartDataLabels !== 'undefined') {
+                chartConfig.options.plugins.datalabels = {
+                    anchor: 'end',
+                    align: 'right',
+                    color: '#333',
+                    font: {
+                        weight: 'bold',
+                        size: 11
+                    },
+                    formatter: function(value) {
+                        return value.toFixed(1) + '%';
+                    }
+                };
+            }
+            
+            const chart = new Chart(marginCtx, chartConfig);
+            
+            // Fallback: Add data labels manually if plugin not available
+            if (typeof ChartDataLabels === 'undefined') {
+                chart.update();
+                setTimeout(() => {
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        meta.data.forEach((bar, index) => {
+                            const value = dataset.data[index];
+                            const ctx = chart.ctx;
+                            ctx.save();
+                            ctx.textAlign = 'right';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillStyle = '#333';
+                            ctx.font = 'bold 11px Arial';
+                            const xPos = bar.x + 8;
+                            const yPos = bar.y;
+                            ctx.fillText(value.toFixed(1) + '%', xPos, yPos);
+                            ctx.restore();
+                        });
+                    });
+                }, 100);
+            }
+        } else if (fallback) {
+            marginCanvas.classList.add('d-none');
+            fallback.classList.remove('d-none');
+        }
+    })();
+
+    // Simple auto-refresh every 60s so numbers stay live if new data is uploaded
+    setTimeout(function () {
+        window.location.reload();
+    }, 60000);
+});
+</script>
+{% endblock %}

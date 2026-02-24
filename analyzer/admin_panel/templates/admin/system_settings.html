@@ -1,0 +1,59 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}System Settings - Admin Panel{% endblock %}
+
+{% block page_title %}System Settings{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="admin-card">
+            <h5 class="card-title">
+                <i class="bi bi-info-circle"></i> System Information
+            </h5>
+            <table class="table">
+                <tr>
+                    <th>Total Files:</th>
+                    <td>{{ total_files|intcomma }}</td>
+                </tr>
+                <tr>
+                    <th>Total Storage:</th>
+                    <td>{{ total_size_mb }} MB</td>
+                </tr>
+                <tr>
+                    <th>Debug Mode:</th>
+                    <td>
+                        {% if debug_mode %}
+                            <span class="badge bg-warning">Enabled</span>
+                        {% else %}
+                            <span class="badge bg-success">Disabled</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="admin-card">
+            <h5 class="card-title">
+                <i class="bi bi-shield-check"></i> Security
+            </h5>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                <strong>Note:</strong> Make sure to set DEBUG=False and configure ALLOWED_HOSTS in production.
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <i class="bi bi-check-circle text-success"></i> Admin authentication required
+                </li>
+                <li class="list-group-item">
+                    <i class="bi bi-check-circle text-success"></i> User access control enabled
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

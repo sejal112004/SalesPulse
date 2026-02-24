@@ -1,0 +1,168 @@
+/* alerts.css */
+
+.alerts-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #0052D4, #003087);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.alert-item {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border-left: 5px solid transparent;
+}
+
+.alert-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.alert-item.unread {
+    border-left-color: #dc3545;
+    background: #fff5f5;
+}
+
+.alert-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-content h5 {
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+    color: #333;
+}
+
+.alert-content p {
+    margin: 0 0 0.5rem 0;
+    color: #555;
+    line-height: 1.5;
+}
+
+.alert-content small {
+    color: #888;
+}
+
+.alert-actions {
+    text-align: right;
+}
+
+.alert-item.custom-alert {
+    border-left-color: #6c757d;
+    background: #f8f9fa;
+}
+
+.alert-item.custom-alert .alert-icon {
+    background: #6c757d !important;
+}
+
+.empty-state {
+    padding: 4rem 2rem;
+}
+
+.empty-state i {
+    opacity: 0.5;
+}
+
+/* Add Alert Form */
+#addAlertForm .card {
+    border: 2px dashed #0052D4;
+    background: #f8f9ff;
+}
+
+#addAlertForm .card-body {
+    padding: 1.5rem;
+}
+
+/* Remove button styling */
+.alert-actions .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.alert-actions .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Page header with button */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+}
+
+.page-header > div:first-child {
+    flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .alert-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .alert-actions {
+        text-align: center;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .alert-actions .btn {
+        width: 100%;
+    }
+
+    .page-title {
+        font-size: 2.2rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .page-header > div:first-child {
+        width: 100%;
+    }
+}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Profile - SalesPulse{% endblock %}
+
+{% block sidebar %}
+    {% include 'includes/sidebar.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Welcome Card -->
+    <div class="welcome-card">
+        <i class="bi bi-person-circle me-2"></i>
+        Welcome back, {{ user.get_full_name|default:user.username|capfirst }}!
+    </div>
+
+    <!-- Profile Info Card -->
+    <div class="profile-card">
+        <div class="profile-image-container">
+            {% if profile and profile.image %}
+                <img src="{{ profile.image.url }}" alt="Profile Picture" class="profile-image">
+            {% else %}
+                <div class="profile-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem; font-weight: 700;">
+                    {{ user.username|first|upper }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="profile-info-section">
+            <h2 class="profile-name">
+                {{ user.get_full_name|default:user.username|capfirst }}
+            </h2>
+            {% if profile and profile.bio %}
+            <p class="profile-bio">{{ profile.bio }}</p>
+            {% else %}
+            <p class="profile-bio" style="color: #adb5bd; font-style: italic;">No bio added yet. Click Edit Profile to add one.</p>
+            {% endif %}
+            <p class="profile-title">
+                <i class="bi bi-briefcase me-2"></i>Data Analyst | SalesPulse User
+            </p>
+            <p class="profile-contact">
+                <i class="bi bi-envelope"></i>
+                <span>{{ user.email }}</span>
+                {% if profile and profile.location %}
+                <span class="ms-3"><i class="bi bi-geo-alt"></i> {{ profile.location }}</span>
+                {% endif %}
+            </p>
+
+            <div class="profile-actions">
+                <button type="button" class="btn btn-profile btn-edit" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Details Card -->
+    <div class="account-card">
+        <h4><i class="bi bi-info-circle me-2"></i>Account Details</h4>
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Member Since:</strong> {{ user.date_joined|date:"F j, Y" }}</p>
+        <p><strong>Last Login:</strong> {{ user.last_login|date:"F j, Y, g:i a"|default:"Never" }}</p>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">
+                    <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="photo" class="form-label">
+                            <i class="bi bi-image me-1"></i>Profile Photo
+                        </label>
+                        <input type="file" class="form-control" id="photo" name="photo" accept="image/jpeg,image/png,image/gif,image/webp">
+                        <small class="form-text text-muted d-block mt-1">Max size: 5MB. Formats: JPEG, PNG, GIF, WebP</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">
+                            <i class="bi bi-card-text me-1"></i>Bio
+                        </label>
+                        <textarea class="form-control" id="bio" name="bio" rows="4" maxlength="500" placeholder="Tell us about yourself...">{% if profile %}{{ profile.bio }}{% endif %}</textarea>
+                        <small class="form-text text-muted d-block mt-1">
+                            <span id="bio-count">0</span>/500 characters
+                        </small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="location" class="form-label">
+                            <i class="bi bi-geo-alt me-1"></i>Location
+                        </label>
+                        <input type="text" class="form-control" id="location" name="location" maxlength="100" placeholder="e.g., New York, NY" value="{% if profile %}{{ profile.location }}{% endif %}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Character counter for bio
+    document.addEventListener('DOMContentLoaded', function() {
+        const bioTextarea = document.getElementById('bio');
+        const bioCount = document.getElementById('bio-count');
+        
+        if (bioTextarea && bioCount) {
+            bioCount.textContent = bioTextarea.value.length;
+            bioTextarea.addEventListener('input', function() {
+                bioCount.textContent = this.value.length;
+            });
+        }
+    });
+</script>
+{% endblock %}

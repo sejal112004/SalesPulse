@@ -1,0 +1,76 @@
+/* customers.css */
+
+.customers-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0052D4, #003087);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.summary-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-8px);
+}
+
+.summary-value {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #0052D4;
+    margin: 0;
+}
+
+.summary-label {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0.5rem 0 0;
+}
+
+.chart-card,
+.table-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1.5rem;
+    border-bottom: 3px solid #0052D4;
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .page-title {
+        font-size: 2.5rem;
+    }
+    .summary-value {
+        font-size: 2.2rem;
+    }
+}

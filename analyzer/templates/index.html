@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}SalesPulse - AI-Powered Sales Analytics & Forecasting{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/welcome.css' %}">
+{% endblock %}
+
+{% block public_content %}
+    {% if not user.is_authenticated %}
+        <!-- Public Landing Page for Non-Logged-In Users -->
+        <div class="hero-section text-center" style="background: linear-gradient(135deg, #f0f1f2ff 0%, #003087 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+            <div class="container" style="z-index:2">
+                <img src="{% static 'logo/logo.png' %}" height="130" class="mb-5" alt="SalesPulse Logo">
+                <h1 class="display-1 fw-bold mb-4">Welcome to <span class="text-success">SalesPulse</span></h1>
+                <p class="lead fs-1 mb-5 opacity-90">AI-Powered Sales Analytics • Real-Time Dashboard • 12-Month Forecasting</p>
+                <div class="d-flex justify-content-center flex-wrap gap-3">
+                    <a href="/login/" class="btn btn-cta btn-primary btn-lg rounded-pill px-5 py-3">Get Started Now</a>
+                    <a href="/upload/" class="btn btn-outline-light btn-lg rounded-pill px-5 py-3">Try with Sample Data</a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Welcome Card for Logged-In Users -->
+        <div class="full-screen-welcome d-flex align-items-center justify-content-center" style="min-height: 100vh; background-color: #f8f9fa;">
+            <div class="welcome-card-full p-5 shadow-lg rounded-4 text-center bg-white">
+                <h1>Welcome back, <span class="welcome-username">{{ user.username|capfirst }}!</span></h1>
+                <p class="fs-3 text-muted mb-5">Your AI-powered sales analytics platform is ready.</p>
+                <div class="d-flex gap-4 flex-wrap justify-content-center">
+                    <a href="/dashboard/" class="btn btn-primary rounded-pill shadow-lg fw-bold px-5 py-3">Go to Dashboard</a>
+                    <a href="/upload/" class="btn btn-outline-dark rounded-pill border-3 fw-bold px-5 py-3">Upload New Dataset</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

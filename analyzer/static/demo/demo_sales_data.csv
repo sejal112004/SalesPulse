@@ -1,0 +1,51 @@
+﻿Order_ID,Order_Date,Customer_Name,Product,Category,Quantity,Price,Region,Profit,Stock
+101,2024-01-05,Amit,Laptop Pro 15,Electronics,1,60000,North,12000,8
+102,2024-01-06,Neha,Smartphone X,Electronics,2,20000,South,8000,15
+103,2024-01-07,Rahul,Tablet S,Electronics,1,15000,East,3000,5
+104,2024-01-08,Pooja,Laptop Air 13,Electronics,1,62000,West,11000,12
+105,2024-01-09,Kiran,Wireless Headphones,Accessories,3,2000,North,1800,25
+106,2024-01-10,Sneha,Smartphone X,Electronics,1,21000,South,7000,9
+107,2024-01-11,Vikas,Laptop Pro 15,Electronics,2,58000,East,20000,6
+108,2024-01-12,Anjali,Tablet S,Electronics,1,16000,West,3200,18
+109,2024-01-13,Rohit,Smartphone X,Electronics,2,22000,North,9000,7
+110,2024-01-14,Meena,Wireless Headphones,Accessories,4,1800,South,2000,10
+111,2024-02-02,Amit,Laptop Pro 15,Electronics,1,61000,North,12500,5
+112,2024-02-05,Neha,Smartwatch Z,Wearables,2,8000,West,4000,20
+113,2024-02-07,Rahul,Smartphone X,Electronics,1,21500,East,7500,11
+114,2024-02-10,Pooja,Wireless Headphones,Accessories,2,1900,South,1600,9
+115,2024-02-12,Kiran,Tablet S,Electronics,1,15500,North,3100,4
+116,2024-02-15,Sneha,Laptop Air 13,Electronics,1,63000,West,12000,8
+117,2024-02-18,Vikas,Smartwatch Z,Wearables,1,8500,East,3500,15
+118,2024-02-20,Anjali,Smartphone X,Electronics,2,22500,North,9500,6
+119,2024-02-22,Rohit,Laptop Pro 15,Electronics,1,60500,South,12100,7
+120,2024-02-25,Meena,Tablet S,Electronics,1,16000,West,3200,12
+121,2024-03-01,Amit,Wireless Headphones,Accessories,5,1950,North,2250,22
+122,2024-03-03,Neha,Laptop Air 13,Electronics,1,64000,East,13000,9
+123,2024-03-05,Rahul,Smartwatch Z,Wearables,2,8200,South,3600,18
+124,2024-03-08,Pooja,Smartphone X,Electronics,1,23000,West,8000,5
+125,2024-03-10,Kiran,Laptop Pro 15,Electronics,2,59500,North,21000,4
+126,2024-03-12,Sneha,Tablet S,Electronics,1,16500,East,3300,10
+127,2024-03-15,Vikas,Wireless Headphones,Accessories,3,2000,South,1800,14
+128,2024-03-18,Anjali,Smartwatch Z,Wearables,1,8800,West,3800,16
+129,2024-03-20,Rohit,Laptop Air 13,Electronics,1,63500,North,12700,6
+130,2024-03-22,Meena,Smartphone X,Electronics,2,23500,East,10000,8
+131,2024-04-01,Amit,Tablet S,Electronics,1,17000,South,3400,7
+132,2024-04-03,Neha,Wireless Headphones,Accessories,4,2050,West,2400,19
+133,2024-04-05,Rahul,Laptop Pro 15,Electronics,1,61500,North,12300,5
+134,2024-04-08,Pooja,Smartwatch Z,Wearables,2,9000,East,4000,13
+135,2024-04-10,Kiran,Smartphone X,Electronics,1,24000,South,8500,4
+136,2024-04-12,Sneha,Laptop Air 13,Electronics,1,64500,West,12900,8
+137,2024-04-15,Vikas,Tablet S,Electronics,1,17500,North,3500,6
+138,2024-04-18,Anjali,Wireless Headphones,Accessories,5,2100,East,2500,21
+139,2024-04-20,Rohit,Smartwatch Z,Wearables,1,9200,South,4100,14
+140,2024-04-22,Meena,Laptop Pro 15,Electronics,2,60000,West,22000,3
+141,2024-05-01,Amit,Smartphone X,Electronics,1,24500,North,9000,5
+142,2024-05-03,Neha,Tablet S,Electronics,1,18000,East,3600,8
+143,2024-05-05,Rahul,Wireless Headphones,Accessories,3,2150,South,1950,12
+144,2024-05-08,Pooja,Laptop Air 13,Electronics,1,65000,West,13000,7
+145,2024-05-10,Kiran,Smartwatch Z,Wearables,2,9500,North,4200,11
+146,2024-05-12,Sneha,Smartphone X,Electronics,2,25000,East,11000,4
+147,2024-05-15,Vikas,Tablet S,Electronics,1,18500,South,3700,6
+148,2024-05-18,Anjali,Wireless Headphones,Accessories,4,2200,West,2600,17
+149,2024-05-20,Rohit,Laptop Pro 15,Electronics,1,62500,North,12500,4
+150,2024-05-22,Meena,Smartwatch Z,Wearables,1,9800,East,4300,9

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Regions - SalesPulse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/region.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="regions-container">
+    <!-- Page Header -->
+    <div class="page-header mb-5">
+        <h1 class="page-title">Regions Insights</h1>
+        <p class="text-muted fs-5">
+            {% if filename %}Analyzing sales from <strong>{{ filename }}</strong>{% else %}No dataset selected{% endif %}
+        </p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value">{{ total_regions|default:0 }}</h3>
+                <p class="summary-label">Total Regions</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value">₹{{ total_region_revenue|default:0|intcomma }}</h3>
+                <p class="summary-label">Total Revenue</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value">₹{{ avg_region_value|default:0|intcomma }}</h3>
+                <p class="summary-label">Average Revenue per Region</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value text-truncate">{{ top_region|default:"N/A" }}</h3>
+                <p class="summary-label">Top Performing Region</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-12">
+            <div class="chart-card" style="max-height: 260px;">
+                <h4 class="card-title">Revenue by Region</h4>
+                <canvas id="regionChart" height="160"></canvas>
+                <p id="regionChartFallback" class="text-muted text-center py-4 d-none">
+                    Not enough region data. Make sure your file has Region, Quantity and Price columns.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regions Table -->
+    <div class="table-card">
+        <h4 class="card-title mb-4">Region-wise Revenue & Orders</h4>
+        {% if regions_list %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Rank</th>
+                        <th>Region</th>
+                        <th>Revenue</th>
+                        <th>Orders (Qty)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in regions_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ r.region }}</td>
+                        <td>₹{{ r.revenue|floatformat:0|intcomma }}</td>
+                        <td>{{ r.orders|intcomma }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-4">
+            {% if filename %}
+                No region insights could be computed. Check that your file has Region, Quantity and Price columns.
+            {% else %}
+                Upload a dataset to see region-wise performance.
+            {% endif %}
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const canvas = document.getElementById('regionChart');
+    const fallback = document.getElementById('regionChartFallback');
+    if (!canvas) return;
+
+    const regionData = JSON.parse('{{ region_chart_data|escapejs }}');
+
+    if (!regionData.labels || !regionData.labels.length) {
+        canvas.classList.add('d-none');
+        if (fallback) fallback.classList.remove('d-none');
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: regionData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Revenue (₹)' },
+                    ticks: {
+                        callback: function (value) {
+                            return '₹' + value.toLocaleString('en-IN');
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

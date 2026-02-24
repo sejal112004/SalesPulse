@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Reports - SalesPulse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container report-container">
+
+    <h2 class="page-title">📊 Sales Reports</h2>
+    <p class="page-subtitle">
+        Overview of sales performance and future forecasting insights.
+    </p>
+
+    <!-- Summary Cards -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="report-card card-blue">
+                <h6>Total Sales</h6>
+                <h3>₹ {{ total_sales|floatformat:0|intcomma }}</h3>
+                <span>{% if has_data %}All Time{% else %}No Data{% endif %}</span>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="report-card card-green">
+                <h6>Average Monthly Sales</h6>
+                <h3>₹ {{ avg_monthly_sales|floatformat:0|intcomma }}</h3>
+                <span>{% if avg_monthly_sales > 0 %}Estimated{% else %}N/A{% endif %}</span>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="report-card card-purple">
+                <h6>Best Performing Month</h6>
+                <h3>{{ best_month }}</h3>
+                <span>Revenue: ₹ {{ best_month_revenue|floatformat:0|intcomma }}</span>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="report-card card-orange">
+                <h6>Expected Growth</h6>
+                <h3 class="{% if expected_growth >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {% if expected_growth > 0 %}+{% endif %}{{ expected_growth }}%
+                </h3>
+                <span>{% if expected_growth != 0 %}Trend{% else %}Stable{% endif %}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Sales Chart -->
+    {% if has_data and monthly_sales_data %}
+    <div class="report-box mt-5">
+        <h4>📈 Monthly Sales Trend</h4>
+        <canvas id="monthlySalesChart" height="80"></canvas>
+    </div>
+    {% endif %}
+
+    <!-- Forecast Summary -->
+    <div class="report-box mt-5">
+        <h4>📊 Sales Summary</h4>
+        {% if has_data %}
+            <p>
+                Based on your uploaded data, here's a comprehensive analysis of your sales performance.
+            </p>
+            <ul>
+                {% if expected_growth > 0 %}
+                <li>Positive growth trend detected ({{ expected_growth|floatformat:1 }}%)</li>
+                {% elif expected_growth < 0 %}
+                <li>Declining trend observed ({{ expected_growth|floatformat:1 }}%) - Review strategy</li>
+                {% else %}
+                <li>Stable sales performance</li>
+                {% endif %}
+                {% if best_month != "N/A" %}
+                <li>Best performing month: {{ best_month }} with ₹{{ best_month_revenue|floatformat:0|intcomma }}</li>
+                {% endif %}
+                {% if avg_monthly_sales > 0 %}
+                <li>Average monthly revenue: ₹{{ avg_monthly_sales|floatformat:0|intcomma }}</li>
+                {% endif %}
+            </ul>
+        {% else %}
+            <p>
+                Upload a sales dataset to see detailed forecasts and insights. SalesPulse will analyze
+                your historical data to predict future trends and identify growth opportunities.
+            </p>
+            <a href="{% url 'analyzer:upload' %}" class="btn btn-primary">Upload Data</a>
+        {% endif %}
+    </div>
+
+    <!-- Product Performance -->
+    {% if product_performance %}
+    <div class="report-box mt-4">
+        <h4>🛒 Product-wise Performance</h4>
+        <table class="table report-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Total Sales</th>
+                    <th>Units Sold</th>
+                    <th>Performance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in product_performance %}
+                <tr>
+                    <td>{{ product.product }}</td>
+                    <td>₹ {{ product.revenue|floatformat:0|intcomma }}</td>
+                    <td>{{ product.units_sold|intcomma }}</td>
+                    <td class="{{ product.performance|lower }}">{{ product.performance }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Category Performance -->
+    {% if category_performance %}
+    <div class="report-box mt-4">
+        <h4>📦 Category-wise Performance</h4>
+        <table class="table report-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Total Sales</th>
+                    <th>Performance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in category_performance %}
+                <tr>
+                    <td>{{ category.category }}</td>
+                    <td>₹ {{ category.revenue|floatformat:0|intcomma }}</td>
+                    <td class="{{ category.performance|lower }}">{{ category.performance }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Conclusion -->
+    <div class="report-box mt-4">
+        <h4>📌 Report Summary</h4>
+        {% if has_data %}
+            <p>
+                This report is generated from your uploaded dataset: <strong>{{ filename }}</strong>.
+                Use these insights to make data-driven decisions and optimize your sales strategy.
+            </p>
+            <p class="mb-0">
+                <small class="text-muted">For detailed forecasts, visit the <a href="{% url 'analyzer:forecasts' %}">Forecasts</a> page.</small>
+            </p>
+        {% else %}
+            <p>
+                The Reports module of SalesPulse helps businesses analyze past performance and
+                make data-driven decisions using sales forecasting techniques. Upload your data to get started.
+            </p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if monthly_sales_data and monthly_sales_data != '{"labels": [], "datasets": []}' %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const canvas = document.getElementById('monthlySalesChart');
+    if (!canvas) return;
+
+    const rawData = JSON.parse('{{ monthly_sales_data|escapejs }}');
+    
+    if (!rawData.datasets || !rawData.datasets.length) return;
+
+    const ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: rawData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₹' + context.parsed.y.toLocaleString('en-IN');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString('en-IN');
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

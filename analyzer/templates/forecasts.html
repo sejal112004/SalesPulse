@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Forecasts - SalesPulse{% endblock %}
+
+{% block extra_css %}
+<style>
+    .forecast-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        transition: transform 0.2s;
+        border-left: 5px solid #0d6efd;
+    }
+
+    .forecast-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .forecast-card h3 {
+        font-weight: 700;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
+
+    .text-success {
+        color: #198754 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    .page-title {
+        font-weight: 800;
+        color: #34495e;
+    }
+
+    .page-subtitle {
+        color: #7f8c8d;
+    }
+
+    .chart-container {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Dynamic Border Classes to replace inline styles */
+    .border-success {
+        border-left-color: #198754 !important;
+    }
+
+    .border-danger {
+        border-left-color: #dc3545 !important;
+    }
+
+    .border-primary {
+        border-left-color: #0d6efd !important;
+    }
+
+    .border-purple {
+        border-left-color: #6610f2 !important;
+    }
+
+    .border-orange {
+        border-left-color: #fd7e14 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title">📈 Sales Forecasts</h2>
+            <p class="page-subtitle">Projected revenue based on historical linear trends.</p>
+        </div>
+
+        <!-- Period Filter -->
+        <div class="btn-group" role="group" aria-label="Forecast Period">
+            <a href="?period=M"
+                class="btn btn-outline-primary {% if selected_period == 'M' %}active{% endif %}">Monthly</a>
+            <a href="?period=Q"
+                class="btn btn-outline-primary {% if selected_period == 'Q' %}active{% endif %}">Quarterly</a>
+            <a href="?period=Y"
+                class="btn btn-outline-primary {% if selected_period == 'Y' %}active{% endif %}">Yearly</a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="forecast-card border-primary">
+                <p class="text-muted text-uppercase small fw-bold mb-1">Forecasted {{ period_name }}s (Next 3)</p>
+                <h3>₹ {{ forecasted_revenue }}</h3>
+                <small class="text-muted">Total predicted revenue</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="forecast-card border-purple">
+                <p class="text-muted text-uppercase small fw-bold mb-1">Current {{ period_name }} Revenue</p>
+                <h3>₹ {{ current_revenue }}</h3>
+                <small class="text-muted">Latest actual data point</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div
+                class="forecast-card {% if growth_class == 'success' %}border-success{% else %}border-danger{% endif %}">
+                <p class="text-muted text-uppercase small fw-bold mb-1">Expected Growth</p>
+                <h3 class="{% if growth_class == 'success' %}text-success{% else %}text-danger{% endif %}">
+                    {{ growth_rate }}%
+                </h3>
+                <small>{{ growth_trend }} vs current</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="forecast-card border-orange">
+                <p class="text-muted text-uppercase small fw-bold mb-1">Peak {{ period_name }}</p>
+                <h3>{{ peak_month }}</h3>
+                <small class="text-muted">Rev: ₹ {{ peak_revenue }}</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forecast Chart -->
+    <div class="chart-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold">Revenue Trend Analysis ({{ period_name }})</h5>
+            <span class="badge bg-light text-dark border">Linear Regression Model</span>
+        </div>
+
+        <canvas id="forecastChart" height="100"></canvas>
+
+        <p id="forecastFallback" class="text-muted text-center py-5 d-none">
+            <i class="bi bi-exclamation-circle fs-1 d-block mb-3"></i>
+            Not enough historical data to generate a forecast. <br>
+            Please upload a dataset with at least 2 distinct {{ period_name|lower }}s.
+        </p>
+
+        <div class="mt-3 p-3 bg-light rounded text-muted small">
+            <strong>Note on Methodology:</strong> This forecast uses a Linear Regression model applied to your
+            aggregated historical data.
+            The dashed line represents the projected trend for the next 3 {{ period_name|lower }}s.
+            Accuracy depends on the consistency of your historical data.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('forecastChart');
+        const fallback = document.getElementById('forecastFallback');
+
+        if (!canvas) return;
+
+        // Parse JSON data from Django context
+        let rawData = null;
+        try {
+            const jsonStr = '{{ forecast_data|escapejs }}';
+            if (jsonStr && jsonStr !== "{}") {
+                rawData = JSON.parse(jsonStr);
+            }
+        } catch (e) {
+            console.error("Error parsing forecast data:", e);
+        }
+
+        // Check if valid data exists
+        if (!rawData || !rawData.datasets || rawData.datasets.length === 0 || !rawData.labels || rawData.labels.length === 0) {
+            canvas.classList.add('d-none');
+            if (fallback) fallback.classList.remove('d-none');
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+
+        // Chart Configuration
+        new Chart(ctx, {
+            type: 'line',
+            data: rawData,
+            options: {
+                responsive: true,
+                spanGaps: true, // Handle missing data points by connecting lines
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 8
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += '₹' + context.parsed.y.toLocaleString('en-IN');
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Period'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Revenue (₹)'
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                if (value >= 10000000) return '₹' + (value / 10000000).toFixed(1) + 'Cr';
+                                if (value >= 100000) return '₹' + (value / 100000).toFixed(1) + 'L';
+                                return '₹' + value.toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

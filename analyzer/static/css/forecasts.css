@@ -1,0 +1,58 @@
+/* forecasts.css */
+
+.container {
+    padding: 20px 15px;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.page-subtitle {
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+/* Summary cards */
+.forecast-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.forecast-card:hover {
+    transform: translateY(-3px);
+}
+
+.forecast-card h3 {
+    margin: 10px 0;
+    font-size: 1.6rem;
+}
+
+.forecast-card p {
+    color: #6b7280;
+    margin: 0;
+}
+
+.text-success {
+    color: #16a34a;
+}
+
+.text-danger {
+    color: #dc2626;
+}
+
+/* Chart container */
+.chart-container {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}

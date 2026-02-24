@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - SalesPulse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth-style.css' %}">
+{% endblock %}
+
+{% block public_content %}
+
+<div class="login-wrapper">
+    <div class="bg-circle"></div>
+
+
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-5 col-md-7 col-11">
+
+                <div class="login-card p-5">
+
+                    <!-- Tabs -->
+                    <div class="text-center mb-5">
+                        <button class="tab-btn active">Login</button>
+                        <a href="{% url 'analyzer:signup' %}" class="tab-btn" style="text-decoration: none; display: inline-block;">Sign Up</a>
+                    </div>
+
+                    <!-- Login Form + Hidden next field for redirect -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger text-center mb-4 rounded-pill">
+                                Invalid username or password.
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-4 position-relative">
+                            <i class="bi bi-person-circle-fill input-icon"></i>
+                            <input type="text" name="username" class="form-control form-control-lg"
+                                   placeholder="Username or Email" required autofocus>
+                        </div>
+
+                        <div class="mb-4 position-relative">
+                            <i class="bi bi-lock-fill input-icon"></i>
+                            <input type="password" name="password" class="form-control form-control-lg"
+                                   placeholder="Password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-auth w-100">
+                            Login to SalesPulse
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            Don't have an account? 
+                            <a href="{% url 'analyzer:signup' %}" class="text-success fw-bold">Sign up here</a>
+                        </small>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <small class="text-muted opacity-75">
+                            Made with love by Sejal • Final Year Project 2025
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7 d-none d-lg-block"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

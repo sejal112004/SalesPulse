@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Alerts - SalesPulse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/alerts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="alerts-container">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="page-title">Alerts & Notifications</h1>
+            <p class="text-muted">Stay updated with important events and insights</p>
+        </div>
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addAlertForm" aria-expanded="false">
+            <i class="bi bi-plus-circle"></i> Add Custom Alert
+        </button>
+    </div>
+
+    <!-- Add Custom Alert Form -->
+    <div class="collapse mb-4" id="addAlertForm">
+        <div class="card card-body">
+            <h5 class="mb-3">Create Custom Alert</h5>
+            <form method="POST" action="{% url 'analyzer:alerts' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_alert">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="alert_title" class="form-label">Alert Title</label>
+                        <input type="text" class="form-control" id="alert_title" name="title" required placeholder="e.g., Important Notice">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="alert_type" class="form-label">Alert Type</label>
+                        <select class="form-select" id="alert_type" name="alert_type" required>
+                            <option value="info">Info</option>
+                            <option value="success">Success</option>
+                            <option value="warning">Warning</option>
+                            <option value="danger">Danger</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="alert_message" class="form-label">Message</label>
+                    <textarea class="form-control" id="alert_message" name="message" rows="3" required placeholder="Enter your alert message here..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="alert_icon" class="form-label">Icon</label>
+                    <select class="form-select" id="alert_icon" name="icon">
+                        <option value="info-circle-fill">Info Circle</option>
+                        <option value="check-circle-fill">Check Circle</option>
+                        <option value="exclamation-triangle-fill">Warning</option>
+                        <option value="star-fill">Star</option>
+                        <option value="bell-fill">Bell</option>
+                        <option value="clock-fill">Clock</option>
+                        <option value="graph-up-arrow">Graph Up</option>
+                        <option value="graph-down-arrow">Graph Down</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add Alert
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#addAlertForm">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="alerts-list">
+        {% if alerts %}
+            {% for alert in alerts %}
+            <div class="alert-item {% if alert.priority == 'high' %}unread{% endif %} {% if alert.is_custom %}custom-alert{% endif %}" id="alert-{{ alert.id }}">
+                <div class="alert-icon bg-{{ alert.icon_color }}">
+                    <i class="bi bi-{{ alert.icon }}"></i>
+                </div>
+                <div class="alert-content flex-grow-1">
+                    <h5>
+                        {{ alert.title }}
+                        {% if alert.is_custom %}
+                            <span class="badge bg-secondary ms-2">Custom</span>
+                        {% endif %}
+                    </h5>
+                    <p>{{ alert.message }}</p>
+                    <small class="text-muted">{{ alert.time_ago }}</small>
+                </div>
+                <div class="alert-actions d-flex gap-2 align-items-center">
+                    {% if alert.action_url %}
+                    <a href="{{ alert.action_url }}" class="btn btn-sm btn-{{ alert.icon_color }}">
+                        {{ alert.action_text|default:"View Details" }}
+                    </a>
+                    {% endif %}
+                    <form method="POST" action="{% url 'analyzer:alerts' %}" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this alert?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="remove_alert">
+                        <input type="hidden" name="alert_id" value="{{ alert.id }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Alert">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state text-center py-5">
+                <i class="bi bi-bell-slash display-1 text-muted"></i>
+                <h3 class="mt-4 text-muted">No alerts available</h3>
+                <p>Upload a dataset to receive intelligent alerts and insights.</p>
+                <a href="{% url 'analyzer:upload' %}" class="btn btn-primary mt-3">Upload Data</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

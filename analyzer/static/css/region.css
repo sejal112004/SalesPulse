@@ -1,0 +1,117 @@
+/* -------------------------------------------------
+   REGION PAGE STYLING
+---------------------------------------------------*/
+
+/* Container */
+.regions-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Page Header */
+.page-header h1.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+
+.page-header p {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+/* Summary Cards */
+.summary-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.summary-card h3.summary-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.summary-card p.summary-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Chart Cards */
+.chart-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.chart-card h4.card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Table Cards */
+.table-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.table-card h4.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.table-card table.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-card table thead th {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #495057;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.table-card table tbody td {
+    font-size: 0.9rem;
+    padding: 0.75rem 0.5rem;
+}
+
+.table-card table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Text Highlights */
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.text-success {
+    color: #198754 !important;
+}
+
+.fw-bold {
+    font-weight: 700 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .summary-card h3.summary-value {
+        font-size: 1.5rem;
+    }
+
+    .chart-card h4.card-title,
+    .table-card h4.card-title {
+        font-size: 1.1rem;
+    }
+}

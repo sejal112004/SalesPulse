@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Your Dashboard - SalesPulse{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                {% if is_editing %}Edit Chart{% else %}Create Your Dashboard{% endif %}
+            </h1>
+            <p class="text-muted small">Design custom charts from your dataset.</p>
+        </div>
+    </div>
+
+    {% if not has_data %}
+    <div class="alert alert-warning" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Please upload a dataset first to create a custom dashboard.
+        <a href="{% url 'analyzer:upload' %}" class="alert-link">Upload Data</a>
+    </div>
+    {% else %}
+
+    <div class="row">
+        <!-- Configuration Panel -->
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Chart Configuration</h6>
+                </div>
+                <div class="card-body">
+                    <form id="chartConfigForm">
+                        <input type="hidden" name="chart_id" value="{{ saved_chart_id|default:'' }}">
+
+                        <div class="mb-3">
+                            <label for="chartType" class="form-label">Chart Type</label>
+                            <select class="form-select" id="chartType" name="chart_type">
+                                <option value="bar" {% if selected_chart_type == 'bar' %}selected{% endif %}>Bar Chart
+                                </option>
+                                <option value="line" {% if selected_chart_type == 'line' %}selected{% endif %}>Line Chart
+                                </option>
+                                <option value="pie" {% if selected_chart_type == 'pie' %}selected{% endif %}>Pie Chart
+                                </option>
+                                <option value="doughnut" {% if selected_chart_type == 'doughnut' %}selected{% endif %}>
+                                    Doughnut Chart</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="xAxis" class="form-label">X-Axis (Category/Date)</label>
+                            <select class="form-select" id="xAxis" name="x_axis">
+                                {% for col in columns %}
+                                <option value="{{ col }}" {% if is_editing %}{% if col == selected_x_axis %}selected{% endif %}{% else %}{% if col == date_col %}selected{% endif %}{% endif %}>{{ col }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Select a categorical or date column.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="yAxis" class="form-label">Y-Axis (Value)</label>
+                            <select class="form-select" id="yAxis" name="y_axis">
+                                {% for col in numeric_columns %}
+                                <option value="{{ col }}" {% if is_editing %}{% if col == selected_y_axis %}selected{% endif %}{% else %}{% if col == 'Revenue' %}selected{% endif %}{% endif %}>{{ col }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Select a numeric column to aggregate.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="aggregation" class="form-label">Aggregation</label>
+                            <select class="form-select" id="aggregation" name="aggregation">
+                                <option value="sum" {% if selected_aggregation == 'sum' %}selected{% endif %}>Sum</option>
+                                <option value="avg" {% if selected_aggregation == 'avg' %}selected{% endif %}>Average
+                                </option>
+                                <option value="count" {% if selected_aggregation == 'count' %}selected{% endif %}>Count
+                                </option>
+                                <option value="min" {% if selected_aggregation == 'min' %}selected{% endif %}>Min</option>
+                                <option value="max" {% if selected_aggregation == 'max' %}selected{% endif %}>Max</option>
+                            </select>
+                        </div>
+
+                        <hr>
+                        <h6 class="text-primary mb-3">Advanced Filters</h6>
+
+                        <div class="mb-3">
+                            <label for="limit" class="form-label">Limit Results (Top N)</label>
+                            <select class="form-select" id="limit" name="limit">
+                                <option value="5" {% if selected_limit == '5' %}selected{% endif %}>Top 5</option>
+                                <option value="10" {% if selected_limit == '10' or not is_editing %}selected{% endif %}>
+                                    Top 10</option>
+                                <option value="20" {% if selected_limit == '20' %}selected{% endif %}>Top 20</option>
+                                <option value="50" {% if selected_limit == '50' %}selected{% endif %}>Top 50</option>
+                                <option value="all" {% if selected_limit == 'all' %}selected{% endif %}>All Results
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label for="filter_op" class="form-label">Value Filter</label>
+                                <select class="form-select" id="filter_op" name="filter_op">
+                                    <option value="" {% if not selected_filter_op %}selected{% endif %}>None</option>
+                                    <option value="gt" {% if selected_filter_op == 'gt' %}selected{% endif %}>Greater Than
+                                        (>)</option>
+                                    <option value="lt" {% if selected_filter_op == 'lt' %}selected{% endif %}>Less Than (
+                                        <)< /option>
+                                    <option value="gte" {% if selected_filter_op == 'gte' %}selected{% endif %}>Greater or
+                                        Equal (>=)</option>
+                                    <option value="lte" {% if selected_filter_op == 'lte' %}selected{% endif %}>Less or
+                                        Equal (<=)< /option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label for="filter_value" class="form-label">Value</label>
+                                <input type="number" class="form-control" id="filter_value" name="filter_value"
+                                    placeholder="0" value="{{ selected_filter_value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-primary" id="generateChartBtn">
+                                <i class="bi bi-bar-chart-fill me-1"></i> {% if is_editing %}Update Preview{% else %}Generate Chart{% endif %}
+                            </button>
+                            <button type="button" class="btn btn-success" id="saveChartBtn" {% if not is_editing %}disabled{% endif %}>
+                                <i class="bi bi-save me-1"></i> {% if is_editing %}Update Saved Chart{% else %}Save to
+                                Dashboard{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Chart Modal -->
+        <div class="modal fade" id="saveChartModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{% if is_editing %}Update Chart{% else %}Save Chart{% endif %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="chartTitleInput" class="form-label">Chart Title</label>
+                        <input type="text" class="form-control" id="chartTitleInput" placeholder="e.g. Sales by Region"
+                            value="{{ saved_title|default:'' }}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmSaveBtn">{% if is_editing %}Update{% else %}Save{% endif %}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Display Area -->
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary" id="chartTitle">
+                        {% if is_editing %}{{ saved_title }}{% else %}Custom Chart{% endif %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area" style="position: relative; height: 400px; width: 100%;">
+                        <canvas id="customChart"></canvas>
+                    </div>
+                    <div id="chartPlaceholder" class="text-center text-muted py-5"
+                        style="{% if is_editing %}display: none;{% else %}display: block;{% endif %}">
+                        <i class="bi bi-bar-chart display-1"></i>
+                        <p class="mt-3">Configure settings and click "Generate Chart"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let myChart = null;
+
+        // If editing, generate the chart immediately on load
+        {% if is_editing %}
+        generateChart();
+        {% endif %}
+
+        document.getElementById('generateChartBtn').addEventListener('click', function () {
+            generateChart();
+        });
+
+        function generateChart() {
+            const form = document.getElementById('chartConfigForm');
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+
+            fetch(`{% url 'analyzer:create_dashboard' %}?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    renderChart(data);
+                    enableSaveButton();
+
+                    // Hide placeholder
+                    document.getElementById('chartPlaceholder').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Error fetching chart data:', error);
+                    alert('Failed to generate chart. Please try again.');
+                });
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('customChart').getContext('2d');
+            const chartType = document.getElementById('chartType').value;
+            const xAxisLabel = document.getElementById('xAxis').value;
+            const yAxisLabel = document.getElementById('yAxis').value;
+            const aggType = document.getElementById('aggregation').options[document.getElementById('aggregation').selectedIndex].text;
+
+            // Destroy previous chart if exists
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            // Generate random colors for Pie/Doughnut charts
+            let backgroundColors = 'rgba(54, 162, 235, 0.6)';
+            let borderColors = 'rgba(54, 162, 235, 1)';
+
+            if (chartType === 'pie' || chartType === 'doughnut') {
+                backgroundColors = data.labels.map(() => `hsla(${Math.random() * 360}, 70%, 70%, 0.7)`);
+                borderColors = data.labels.map(() => '#fff');
+            }
+
+            myChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: `${aggType} of ${yAxisLabel} by ${xAxisLabel}`,
+                        data: data.values,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        fill: chartType === 'line'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: `${aggType} of ${yAxisLabel} by ${xAxisLabel}`
+                        }
+                    },
+                    scales: (chartType !== 'pie' && chartType !== 'doughnut') ? {
+                        y: {
+                            beginAtZero: true
+                        }
+                    } : {}
+                }
+            });
+
+            // Update Chart Title Card Header if not customized yet
+            // document.getElementById('chartTitle').innerText = `${aggType} of ${yAxisLabel} by ${xAxisLabel}`;
+        }
+
+        // Enable Save button after successful generation
+        function enableSaveButton() {
+            document.getElementById('saveChartBtn').disabled = false;
+        }
+
+        document.getElementById('saveChartBtn').addEventListener('click', function () {
+            new bootstrap.Modal(document.getElementById('saveChartModal')).show();
+        });
+
+        document.getElementById('confirmSaveBtn').addEventListener('click', function () {
+            const title = document.getElementById('chartTitleInput').value;
+            if (!title) {
+                alert("Please enter a title.");
+                return;
+            }
+
+            const form = document.getElementById('chartConfigForm');
+            const formData = new FormData(form);
+            formData.append('title', title);
+
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
+
+            fetch(`{% url 'analyzer:save_chart' %}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        alert('Chart saved successfully!');
+                        bootstrap.Modal.getInstance(document.getElementById('saveChartModal')).hide();
+                        // Optional: Redirect to dashboard after save/update
+                        window.location.href = "{% url 'analyzer:my_dashboard' %}";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving chart:', error);
+                    alert('Failed to save chart.');
+                });
+        });
+    });
+</script>
+{% endblock %}

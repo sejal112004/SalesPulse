@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign Up - SalesPulse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth-style.css' %}">
+{% endblock %}
+
+{% block public_content %}
+<div class="login-wrapper">
+
+    <!-- Same Green Circle Background -->
+    <div class="bg-circle"></div>
+
+
+    <div class="container">
+        <div class="row justify-content-start">
+            <div class="col-lg-5 col-md-7">
+
+                <div class="login-card p-5 mx-auto">
+
+                    <!-- Tabs: Login | Sign Up (Sign Up active) -->
+                    <div class="text-center mb-5">
+                        <a href="{% url 'login' %}" class="tab-btn" style="text-decoration: none; display: inline-block;">Login</a>
+                        <button class="tab-btn active">Sign Up</button>
+                    </div>
+
+                    <!-- Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Sign Up Form -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4 position-relative">
+                            <i class="bi bi-person-fill input-icon"></i>
+                            <input type="text" name="username" class="form-control form-control-lg"
+                                   placeholder="Full Name or Username" required>
+                        </div>
+
+                        <div class="mb-4 position-relative">
+                            <i class="bi bi-envelope-fill input-icon"></i>
+                            <input type="email" name="email" class="form-control form-control-lg"
+                                   placeholder="Email Address" required>
+                        </div>
+
+                        <div class="mb-4 position-relative">
+                            <i class="bi bi-lock-fill input-icon"></i>
+                            <input type="password" name="password1" class="form-control form-control-lg"
+                                   placeholder="Create Password" required>
+                        </div>
+
+                        <div class="mb-4 position-relative">
+                            <i class="bi bi-lock-fill input-icon"></i>
+                            <input type="password" name="password2" class="form-control form-control-lg"
+                                   placeholder="Confirm Password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-auth w-100">
+                            Create Account
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            Already have an account?
+                            <a href="{% url 'login' %}" class="text-success fw-bold">Login here</a>
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

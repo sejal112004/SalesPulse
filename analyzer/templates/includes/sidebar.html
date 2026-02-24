@@ -1,0 +1,179 @@
+<style>
+    :root {
+        --sidebar-width: 250px;
+        --sidebar-bg: #f7f7f8;
+        --border-color: #e5e7eb;
+    }
+
+    /* ========================= */
+    /* APP LAYOUT (KEY FIX)      */
+    /* ========================= */
+    .app-layout {
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 1fr;
+        min-height: 100vh;
+    }
+
+    /* ========================= */
+    /* SIDEBAR                   */
+    /* ========================= */
+    .chatgpt-sidebar {
+        background: var(--sidebar-bg);
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        position: sticky;
+        top: 0;
+        /* Stick to top of viewport */
+        height: 100vh;
+        /* Full viewport height */
+        overflow: hidden;
+    }
+
+    /* ===== MENU ===== */
+    .sidebar-menu {
+        padding: 50px 20px 20px;
+    }
+
+    .sidebar-menu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-menu li {
+        margin-bottom: 8px;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-radius: 10px;
+        color: #111827;
+        font-size: 14px;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+
+    .sidebar-link:hover {
+        background: #e5e7eb;
+    }
+
+    .sidebar-link.active {
+        background: #2563eb;
+        color: white;
+    }
+
+    /* ===== PROFILE ===== */
+    .sidebar-profile {
+        padding: 16px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+        /* Do not shrink */
+        background: var(--sidebar-bg);
+        /* Ensures same bg if menu scrolls */
+        position: fixed;
+        /* Fixed at bottom left */
+        bottom: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        z-index: 1000;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-profile img {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #d1d5db;
+    }
+
+    .profile-avatar-placeholder {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        border: 1px solid #d1d5db;
+    }
+
+    .sidebar-username {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .sidebar-view {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    /* ========================= */
+    /* MAIN CONTENT               */
+    /* ========================= */
+    .app-content {
+        background: #f9fafb;
+        padding: 2.5rem;
+        overflow-x: hidden;
+    }
+
+    /* ========================= */
+    /* RESPONSIVE                 */
+    /* ========================= */
+    @media (max-width: 768px) {
+        .app-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .chatgpt-sidebar {
+            order: -1;
+        }
+    }
+</style>
+<div class="chatgpt-sidebar">
+
+    <div class="sidebar-menu">
+        <ul>
+            <li><a href="{% url 'analyzer:dashboard' %}" class="sidebar-link active">Dashboard</a></li>
+            <li><a href="{% url 'analyzer:upload' %}" class="sidebar-link">Upload</a></li>
+            <li><a href="{% url 'analyzer:products' %}" class="sidebar-link">Products</a></li>
+            <li><a href="{% url 'analyzer:customers' %}" class="sidebar-link">Customers</a></li>
+            <li><a href="{% url 'analyzer:forecasts' %}" class="sidebar-link">Forecasts</a></li>
+            <li><a href="{% url 'analyzer:regions' %}" class="sidebar-link">Region</a></li>
+            <li><a href="{% url 'analyzer:create_dashboard' %}" class="sidebar-link"><i
+                        class="bi bi-plus-square me-2"></i>Create Dashboard</a></li>
+            <li><a href="{% url 'analyzer:my_dashboard' %}" class="sidebar-link"><i class="bi bi-grid-fill me-2"></i>My
+                    Dashboard</a></li>
+        </ul>
+    </div>
+
+    <div class="sidebar-profile">
+        <a href="{% url 'analyzer:profile' %}"
+            style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit;">
+            {% if user.profile.image and user.profile.image.url %}
+            <img src="{{ user.profile.image.url }}" alt="Profile">
+            {% else %}
+            <div class="profile-avatar-placeholder">
+                {{ user.username|first|upper }}
+            </div>
+            {% endif %}
+            <div>
+                <div class="sidebar-username">{{ user.username }}</div>
+                <div class="sidebar-view">View Profile</div>
+            </div>
+        </a>
+    </div>
+
+
+</div>

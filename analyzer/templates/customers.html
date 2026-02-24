@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Customers - SalesPulse{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/customers.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="customers-container">
+    <!-- Page Header -->
+    <div class="page-header mb-5">
+        <h1 class="page-title">Customer Insights</h1>
+        <p class="text-muted fs-5">
+            {% if filename %}Analyzing customers from <strong>{{ filename }}</strong>{% else %}No dataset selected{% endif %}
+        </p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value">{{ total_customers|default:0|intcomma }}</h3>
+                <p class="summary-label">Total Customers</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value">₹{{ total_customer_revenue|default:0|intcomma }}</h3>
+                <p class="summary-label">Total Customer Revenue</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value">
+                    {% if avg_customer_value %}₹{{ avg_customer_value|intcomma }}{% else %}N/A{% endif %}
+                </h3>
+                <p class="summary-label">Average Customer Value</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="summary-card">
+                <h3 class="summary-value text-truncate">{{ top_customer|default:"N/A" }}</h3>
+                <p class="summary-label">Top Customer (by revenue)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h4 class="card-title">Top 10 Customers by Revenue</h4>
+                <canvas id="topCustomersChart" height="320"></canvas>
+                <p id="topCustomersFallback" class="text-muted text-center py-4 d-none">
+                    Not enough customer data to build this chart.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h4 class="card-title">Revenue by Region</h4>
+                <canvas id="customerRegionChart" height="320"></canvas>
+                <p id="customerRegionFallback" class="text-muted text-center py-4 d-none">
+                    Region column not found in dataset.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Customers Table -->
+    <div class="table-card">
+        <h4 class="card-title mb-4">Top Customers</h4>
+        {% if top_customers %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Orders</th>
+                        <th>Total Revenue</th>
+                        <th>Avg. Order Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in top_customers %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ c.customer_name }}</strong></td>
+                        <td>{{ c.order_count|default:0|intcomma }}</td>
+                        <td>₹{{ c.Revenue|default:0|intcomma }}</td>
+                        <td>
+                            {% if c.avg_order_value %}
+                                ₹{{ c.avg_order_value|floatformat:0|intcomma }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-4">
+            {% if filename %}
+                No customer metrics could be computed. Check that your file has Customer, Quantity, and Price columns.
+            {% else %}
+                Upload a dataset to see customer performance.
+            {% endif %}
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Top customers chart
+    const topCustomersData = JSON.parse('{{ top_customers_data|escapejs }}');
+    (function () {
+        const canvas = document.getElementById('topCustomersChart');
+        const fallback = document.getElementById('topCustomersFallback');
+        if (!canvas) return;
+
+        if (topCustomersData.labels && topCustomersData.labels.length) {
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: topCustomersData,
+                options: {
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Revenue (₹)' },
+                            ticks: {
+                                callback: function (value) {
+                                    return '₹' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else if (fallback) {
+            canvas.classList.add('d-none');
+            fallback.classList.remove('d-none');
+        }
+    })();
+
+    // Region chart
+    const regionChartData = JSON.parse('{{ region_data|escapejs }}');
+    (function () {
+        const canvas = document.getElementById('customerRegionChart');
+        const fallback = document.getElementById('customerRegionFallback');
+        if (!canvas) return;
+
+        if (regionChartData.labels && regionChartData.labels.length) {
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: regionChartData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        } else if (fallback) {
+            canvas.classList.add('d-none');
+            fallback.classList.remove('d-none');
+        }
+    })();
+});
+</script>
+{% endblock %}

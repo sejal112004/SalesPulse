@@ -1,0 +1,118 @@
+/* analyzer/static/css/auth-style.css */
+.login-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-circle {
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    background: linear-gradient(135deg, #00bfa5, #1de9b6);
+    border-radius: 50%;
+    top: -200px;
+    right: -200px;
+    opacity: 0.9;
+    z-index: 1;
+}
+
+.laptop-img {
+    width: 420px;
+    z-index: 2;
+    filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
+}
+
+.logo-img {
+    width: 500px;
+    max-width: 90%;
+    height: auto;
+    z-index: 2;
+    filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
+    border-radius: 20px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.05);
+}
+
+.login-card {
+    background: white;
+    border-radius: 28px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.18);
+    z-index: 10;
+    max-width: 440px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #999;
+    padding: 12px 35px;
+    border-bottom: 4px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab-btn.active, .tab-btn:hover {
+    color: #00bfa5;
+    border-bottom: 4px solid #00bfa5;
+}
+
+.form-control {
+    border-radius: 50px;
+    padding: 14px 20px 14px 55px !important;
+    border: 2.5px solid #e0e0e0;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    border-color: #00bfa5;
+    box-shadow: 0 0 0 0.2rem rgba(0, 191, 165, 0.25);
+}
+
+.input-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00bfa5;
+    font-size: 1.3rem;
+    z-index: 5;
+}
+
+.btn-auth {
+    background: #00bfa5;
+    color: white;
+    border-radius: 50px;
+    padding: 14px 40px;
+    font-weight: bold;
+    border: none;
+    font-size: 1.1rem;
+    transition: 0.3s;
+}
+
+.btn-auth:hover {
+    background: #009688;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .bg-circle { width: 500px; height: 500px; top: -100px; right: -100px; }
+    .laptop-img { width: 300px; }
+    .logo-img { width: 350px; max-width: 85%; }
+    .login-card { margin: 20px; }
+}
+
+@media (max-width: 992px) {
+    .logo-img {
+        width: 400px;
+    }
+}

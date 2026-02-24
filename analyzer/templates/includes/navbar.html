@@ -1,0 +1,73 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-custom shadow-lg sticky-top">
+    <div class="container-fluid">
+        <!-- Brand Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'analyzer:dashboard' %}">
+            <img src="{% static 'logo/logo.png' %}" alt="SalesPulse Logo" height="50">
+        </a>
+
+        <!-- Toggle button for mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="{% url 'analyzer:alerts' %}">Alerts</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'analyzer:reports' %}">Reports</a></li>
+                <li class="nav-item"><a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<style>
+/* Custom Navbar */
+.navbar-custom {
+    background: linear-gradient(90deg, #ffffff 0%, #3979c3 100%);
+    height: 76px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+/* Brand Logo tweaks */
+.navbar-brand img {
+    transition: transform 0.3s ease;
+}
+.navbar-brand img:hover {
+    transform: scale(1.05);
+}
+
+/* Navbar links styling */
+.navbar-custom .nav-link {
+    color: #ffffff;
+    margin-left: 15px;
+    transition: color 0.3s ease, transform 0.3s ease;
+    font-size: 16px;
+}
+.navbar-custom .nav-link:hover {
+    color: #ffdd57;
+    transform: scale(1.1);
+    text-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* Mobile toggle icon color */
+.navbar-custom .navbar-toggler {
+    border-color: rgba(255,255,255,0.5);
+}
+.navbar-custom .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' 
+    xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-width='2' 
+    stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+/* Optional: Smooth collapse for mobile */
+.navbar-collapse {
+    transition: all 0.3s ease-in-out;
+}
+</style>

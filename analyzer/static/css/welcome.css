@@ -1,0 +1,84 @@
+/* welcome.css - All custom styles for the welcome/index page */
+
+.hero-section {
+    background: linear-gradient(135deg, #0052D4 0%, #003087 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(circle, rgba(0,191,165,0.35) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.btn-cta {
+    background: white;
+    color: #0052D4;
+    padding: 18px 55px;
+    font-size: 1.5rem;
+    border-radius: 50px;
+    font-weight: bold;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    transition: all 0.3s;
+}
+
+.btn-cta:hover {
+    background: #f0f8ff;
+    transform: translateY(-8px);
+}
+
+.full-screen-welcome {
+    position: fixed;
+    top: 76px;
+    left: 280px;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    z-index: 1;
+}
+
+.welcome-card-full {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 40px;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.welcome-card-full h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #0052D4, #003087);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.welcome-card-full .welcome-username {
+    font-size: 3.8rem;
+    color: #0052D4;
+    font-weight: 900;
+}

@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Dashboard - SalesPulse{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">My Dashboard</h1>
+            <p class="text-muted small">Your collection of saved charts.</p>
+        </div>
+        <a href="{% url 'analyzer:create_dashboard' %}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg text-white-50 me-1"></i> Create New Chart
+        </a>
+    </div>
+
+    {% if not charts %}
+    <div class="text-center py-5">
+        <div class="mb-3">
+            <i class="bi bi-collection display-1 text-gray-300"></i>
+        </div>
+        <h3>No saved charts yet</h3>
+        <p class="text-muted">Create custom charts from your datasets and save them here.</p>
+        <a href="{% url 'analyzer:create_dashboard' %}" class="btn btn-primary mt-3">Create Chart</a>
+    </div>
+    {% else %}
+
+    <div class="row" id="dashboardGrid" data-masonry='{"percentPosition": true }'>
+        {% for chart in charts %}
+        <div class="col-md-6 col-lg-6 mb-4">
+            <div class="card shadow h-100 chart-card" data-chart-id="{{ chart.id }}"
+                data-params="chart_type={{ chart.chart_type }}&x_axis={{ chart.x_axis }}&y_axis={{ chart.y_axis }}&aggregation={{ chart.aggregation }}&limit={{ chart.limit }}&filter_op={{ chart.filter_op|default:'' }}&filter_value={{ chart.filter_value|default:'' }}">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">{{ chart.title }}</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink{{ chart.id }}"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end shadow animated--fade-in"
+                            aria-labelledby="dropdownMenuLink{{ chart.id }}">
+                            <a class="dropdown-item"
+                                href="{% url 'analyzer:create_dashboard' %}?edit_id={{ chart.id }}">
+                                <i class="bi bi-pencil-square me-2 text-warning"></i> Edit
+                            </a>
+                            <a class="dropdown-item text-danger delete-chart-btn" href="#"
+                                data-chart-id="{{ chart.id }}">
+                                <i class="bi bi-trash me-2"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area" style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="chartCanvas{{ chart.id }}"></canvas>
+                    </div>
+                </div>
+                <div class="card-footer small text-muted">
+                    {{ chart.aggregation|title }} of {{ chart.y_axis }} by {{ chart.x_axis }}
+                    {% if chart.limit != 'all' %}(Top {{ chart.limit }}){% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Masonry for grid layout (optional, using simple row/col for now but keeping attribute) -->
+<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"
+    integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"
+    async></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const charts = document.querySelectorAll('.chart-card');
+
+        charts.forEach(card => {
+            const chartId = card.getAttribute('data-chart-id');
+            const params = card.getAttribute('data-params');
+            const ctx = document.getElementById(`chartCanvas${chartId}`).getContext('2d');
+
+            // Fetch data for each chart
+            fetch(`{% url 'analyzer:create_dashboard' %}?${params}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error(`Error loading chart ${chartId}:`, data.error);
+                        return;
+                    }
+                    renderSavedChart(ctx, data);
+                })
+                .catch(error => {
+                    console.error(`Error fetching chart ${chartId}:`, error);
+                });
+        });
+
+        function renderSavedChart(ctx, data) {
+            const chartType = data.chart_type;
+
+            // Generate random colors for Pie/Doughnut charts
+            let backgroundColors = 'rgba(54, 162, 235, 0.6)';
+            let borderColors = 'rgba(54, 162, 235, 1)';
+
+            if (chartType === 'pie' || chartType === 'doughnut') {
+                backgroundColors = data.labels.map(() => `hsla(${Math.random() * 360}, 70%, 70%, 0.7)`);
+                borderColors = data.labels.map(() => '#fff');
+            }
+
+            new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Value',
+                        data: data.values,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        fill: chartType === 'line'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: (chartType === 'pie' || chartType === 'doughnut'),
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: (chartType !== 'pie' && chartType !== 'doughnut') ? {
+                        y: {
+                            beginAtZero: true
+                        }
+                    } : {}
+                }
+            });
+        }
+
+        // Delete Chart Logic
+        document.querySelectorAll('.delete-chart-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (!confirm("Are you sure you want to delete this chart?")) return;
+
+                const chartId = this.dataset.chartId;
+                const cardCol = this.closest('.col-md-6');
+
+                fetch(`/dashboard/delete/${chartId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            cardCol.remove();
+                            if (document.querySelectorAll('.chart-card').length === 0) {
+                                location.reload();
+                            }
+                        } else {
+                            alert('Error deleting chart.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Delete error:', err);
+                        alert('Failed to delete chart.');
+                    });
+            });
+        });
+    });
+</script>
+{% endblock %}

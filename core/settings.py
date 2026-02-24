@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
+import os
 import re
+from pathlib import Path
+
 # Ignore harmless Chrome DevTools 404 logs
 class IgnoreChromeDevTools404Filter:
     def filter(self, record):
@@ -21,17 +23,18 @@ class IgnoreChromeDevTools404Filter:
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-valz%*)r4)_uvog6fr$%by1vdh=x%d!3k5nm5le3r$5-th_ido'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-valz%*)r4)_uvog6fr$%by1vdh=x%d!3k5nm5le3r$5-th_ido')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True    
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS")
+
+if ALLOWED_HOSTS:
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS.split(",")]
+else:
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -142,7 +145,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'analyzer/static',
     BASE_DIR / 'analyzer/admin_panel/static',
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media/Upload files
 MEDIA_URL = '/media/'

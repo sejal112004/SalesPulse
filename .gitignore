@@ -25,6 +25,9 @@ wheels/
 venv/
 ENV/
 
+# Environment Variables
+.env
+
 # Database
 db.sqlite3
 db.sqlite3-journal
